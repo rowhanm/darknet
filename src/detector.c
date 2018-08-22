@@ -1113,7 +1113,11 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
             if(strlen(input) > 0)
                 if (input[strlen(input) - 1] == 0x0d) input[strlen(input) - 1] = 0;
         } else {
-            printf("Enter Image Path: ");
+            // char *pos = strchr(input, '.');
+            // int position = pos ? pos - input : -1;
+            // printf("%d   ", position);
+            // printf("%s   ", input);
+            // printf("Enter Image Path: ");
             fflush(stdout);
             input = fgets(input, 256, stdin);
             if(!input) return;
@@ -1133,14 +1137,17 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
         time= what_time_is_it_now();
         network_predict(net, X);
         //network_predict_image(&net, im); letterbox = 1;
-        printf("%s: Predicted in %f seconds.\n", input, (what_time_is_it_now()-time));
+        // printf("%s: Predicted in %f seconds.\n", input, (what_time_is_it_now()-time));
+        char *new_input = (char*) malloc(17);
+        strncpy(new_input, input+43, 16);
+        printf("%s,", new_input);
         //get_region_boxes(l, 1, 1, thresh, probs, boxes, 0, 0);
         // if (nms) do_nms_sort_v2(boxes, probs, l.w*l.h*l.n, l.classes, nms);
         //draw_detections(im, l.w*l.h*l.n, thresh, boxes, probs, names, alphabet, l.classes);
         int nboxes = 0;
         detection *dets = get_network_boxes(&net, im.w, im.h, thresh, hier_thresh, 0, 1, &nboxes, letterbox);
         if (nms) do_nms_sort(dets, nboxes, l.classes, nms);
-        draw_detections_v3(im, dets, nboxes, thresh, names, alphabet, l.classes, ext_output);
+        draw_detections_v3(im, dets, nboxes, thresh, names, alphabet, l.classes, ext_output, input);
         save_image(im, "predictions");
         if (!dont_show) {
             show_image(im, "predictions");
@@ -1185,7 +1192,7 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
 #endif
         if (filename) break;
     }
-
+    printf("\n");
     // free memory
     free_ptrs(names, net.layers[net.n - 1].classes);
     free_list_contents_kvp(options);
